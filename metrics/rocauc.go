@@ -57,7 +57,7 @@ func ROCAUC(yTrue, yScores []float64) float64 {
 	fPos := float64(nPos)
 	fNeg := float64(nNeg)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		idx := indices[i]
 		if yTrue[idx] == 1.0 {
 			tp++
