@@ -80,9 +80,9 @@ func (cfg ElasticNetConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) 
 	// Precompute column norms.
 	colNorms := make([]float64, nFeatures)
 	rawX := xWork.RawMatrix()
-	for j := 0; j < nFeatures; j++ {
+	for j := range nFeatures {
 		sum := 0.0
-		for i := 0; i < nSamples; i++ {
+		for i := range nSamples {
 			v := rawX.Data[i*rawX.Stride+j]
 			sum += v * v
 		}
@@ -107,7 +107,7 @@ func (cfg ElasticNetConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) 
 		}
 
 		maxChange := 0.0
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			denom := colNorms[j] + l2Penalty
 			if denom == 0 {
 				continue
@@ -117,7 +117,7 @@ func (cfg ElasticNetConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) 
 
 			// Compute rho = X_j' * residual + colNorm_j * coef_j
 			rho := 0.0
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				rho += rawX.Data[i*rawX.Stride+j] * residual[i]
 			}
 			rho += colNorms[j] * oldCoef
@@ -127,7 +127,7 @@ func (cfg ElasticNetConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) 
 
 			delta := coef[j] - oldCoef
 			if delta != 0 {
-				for i := 0; i < nSamples; i++ {
+				for i := range nSamples {
 					residual[i] -= delta * rawX.Data[i*rawX.Stride+j]
 				}
 			}
@@ -150,7 +150,7 @@ func (cfg ElasticNetConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) 
 
 	if cfg.FitIntercept {
 		intercept := yMeanVal
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			intercept -= xMean[j] * coef[j]
 		}
 		model.Intercept = intercept

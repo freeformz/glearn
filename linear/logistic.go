@@ -158,7 +158,7 @@ func (cfg LogisticRegressionConfig) fitBinary(
 	problem := optimize.Problem{
 		Func: func(params []float64) float64 {
 			loss := 0.0
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				z := dotWithParams(rawX.Data[i*rawX.Stride:i*rawX.Stride+nFeatures], params, nFeatures, cfg.FitIntercept)
 				// Numerically stable log-loss: log(1 + exp(-y*z)) where y in {-1, +1}
 				label := 2*binaryY[i] - 1 // map 0/1 to -1/+1
@@ -171,7 +171,7 @@ func (cfg LogisticRegressionConfig) fitBinary(
 			}
 			// L2 regularization on coefficients only (not intercept).
 			reg := 0.0
-			for j := 0; j < nFeatures; j++ {
+			for j := range nFeatures {
 				idx := j
 				if cfg.FitIntercept {
 					idx = j + 1
@@ -184,24 +184,24 @@ func (cfg LogisticRegressionConfig) fitBinary(
 			for k := range grad {
 				grad[k] = 0
 			}
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				z := dotWithParams(rawX.Data[i*rawX.Stride:i*rawX.Stride+nFeatures], params, nFeatures, cfg.FitIntercept)
 				prob := sigmoid(z)
 				diff := (prob - binaryY[i]) / float64(nSamples)
 
 				if cfg.FitIntercept {
 					grad[0] += diff
-					for j := 0; j < nFeatures; j++ {
+					for j := range nFeatures {
 						grad[j+1] += diff * rawX.Data[i*rawX.Stride+j]
 					}
 				} else {
-					for j := 0; j < nFeatures; j++ {
+					for j := range nFeatures {
 						grad[j] += diff * rawX.Data[i*rawX.Stride+j]
 					}
 				}
 			}
 			// L2 regularization gradient.
-			for j := 0; j < nFeatures; j++ {
+			for j := range nFeatures {
 				idx := j
 				if cfg.FitIntercept {
 					idx = j + 1
@@ -215,7 +215,7 @@ func (cfg LogisticRegressionConfig) fitBinary(
 	initParams := make([]float64, nParams)
 
 	settings := &optimize.Settings{
-		MajorIterations: cfg.MaxIter,
+		MajorIterations:   cfg.MaxIter,
 		GradientThreshold: cfg.Tolerance,
 		Converger: &optimize.FunctionConverge{
 			Absolute:   1e-12,
@@ -272,7 +272,7 @@ func (lr *LogisticRegression) Predict(X *mat.Dense) ([]float64, error) {
 	nSamples, nClasses := probs.Dims()
 	preds := make([]float64, nSamples)
 
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		bestClass := 0
 		bestProb := probs.At(i, 0)
 		for c := 1; c < nClasses; c++ {
@@ -301,7 +301,7 @@ func (lr *LogisticRegression) PredictProbabilities(X *mat.Dense) (*mat.Dense, er
 	if nClasses == 2 {
 		// Binary: use single set of coefficients.
 		probs := mat.NewDense(nSamples, 2, nil)
-		for i := 0; i < nSamples; i++ {
+		for i := range nSamples {
 			z := lr.Intercept[0]
 			for j := 0; j < lr.NFeatures; j++ {
 				z += rawX.Data[i*rawX.Stride+j] * lr.Coefficients[0][j]
@@ -315,9 +315,9 @@ func (lr *LogisticRegression) PredictProbabilities(X *mat.Dense) (*mat.Dense, er
 
 	// Multiclass: OvR with softmax-like normalization.
 	probs := mat.NewDense(nSamples, nClasses, nil)
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		sum := 0.0
-		for c := 0; c < nClasses; c++ {
+		for c := range nClasses {
 			z := lr.Intercept[c]
 			for j := 0; j < lr.NFeatures; j++ {
 				z += rawX.Data[i*rawX.Stride+j] * lr.Coefficients[c][j]
@@ -328,7 +328,7 @@ func (lr *LogisticRegression) PredictProbabilities(X *mat.Dense) (*mat.Dense, er
 		}
 		// Normalize to sum to 1.
 		if sum > 0 {
-			for c := 0; c < nClasses; c++ {
+			for c := range nClasses {
 				probs.Set(i, c, probs.At(i, c)/sum)
 			}
 		}
@@ -384,11 +384,11 @@ func dotWithParams(row []float64, params []float64, nFeatures int, fitIntercept 
 	z := 0.0
 	if fitIntercept {
 		z = params[0]
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			z += row[j] * params[j+1]
 		}
 	} else {
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			z += row[j] * params[j]
 		}
 	}

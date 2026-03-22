@@ -105,7 +105,7 @@ func TestLogisticRegressionProbabilities(t *testing.T) {
 	}
 
 	// Probabilities should sum to 1 for each sample.
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		sum := probs.At(i, 0) + probs.At(i, 1)
 		if math.Abs(sum-1.0) > 1e-6 {
 			t.Errorf("sample %d: probabilities sum to %g, expected 1.0", i, sum)
@@ -113,7 +113,7 @@ func TestLogisticRegressionProbabilities(t *testing.T) {
 	}
 
 	// Negative x values should have higher class-0 probability.
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if probs.At(i, 0) < probs.At(i, 1) {
 			t.Errorf("sample %d (x=%g): expected class 0 prob > class 1 prob, got %g vs %g",
 				i, X.At(i, 0), probs.At(i, 0), probs.At(i, 1))
@@ -171,9 +171,9 @@ func TestLogisticRegressionMulticlass(t *testing.T) {
 	}
 
 	// Probabilities should sum to ~1 for each sample.
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		sum := 0.0
-		for c := 0; c < nClasses; c++ {
+		for c := range nClasses {
 			sum += probs.At(i, c)
 		}
 		if math.Abs(sum-1.0) > 1e-6 {

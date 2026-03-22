@@ -74,13 +74,13 @@ func (cfg LinearRegressionConfig) Fit(ctx context.Context, X *mat.Dense, y []flo
 	if cfg.FitIntercept {
 		model.Intercept = beta.AtVec(0)
 		model.Coefficients = make([]float64, nFeatures)
-		for i := 0; i < nFeatures; i++ {
+		for i := range nFeatures {
 			model.Coefficients[i] = beta.AtVec(i + 1)
 		}
 	} else {
 		model.Intercept = 0
 		model.Coefficients = make([]float64, nFeatures)
-		for i := 0; i < nFeatures; i++ {
+		for i := range nFeatures {
 			model.Coefficients[i] = beta.AtVec(i)
 		}
 	}
@@ -139,7 +139,7 @@ func buildDesignMatrix(X *mat.Dense, nSamples, nFeatures int, fitIntercept bool)
 	nCols := nFeatures + 1
 	data := make([]float64, nSamples*nCols)
 	raw := X.RawMatrix()
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		data[i*nCols] = 1.0
 		copy(data[i*nCols+1:i*nCols+nCols], raw.Data[i*raw.Stride:i*raw.Stride+nFeatures])
 	}
@@ -150,10 +150,10 @@ func buildDesignMatrix(X *mat.Dense, nSamples, nFeatures int, fitIntercept bool)
 func linearPredict(X *mat.Dense, coef []float64, intercept float64, nSamples, nFeatures int) []float64 {
 	preds := make([]float64, nSamples)
 	raw := X.RawMatrix()
-	for i := 0; i < nSamples; i++ {
+	for i := range nSamples {
 		sum := intercept
 		row := raw.Data[i*raw.Stride : i*raw.Stride+nFeatures]
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			sum += row[j] * coef[j]
 		}
 		preds[i] = sum

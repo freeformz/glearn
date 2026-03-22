@@ -73,9 +73,9 @@ func (cfg LassoConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 	// Precompute column norms (sum of squares) for coordinate descent.
 	colNorms := make([]float64, nFeatures)
 	rawX := xWork.RawMatrix()
-	for j := 0; j < nFeatures; j++ {
+	for j := range nFeatures {
 		sum := 0.0
-		for i := 0; i < nSamples; i++ {
+		for i := range nSamples {
 			v := rawX.Data[i*rawX.Stride+j]
 			sum += v * v
 		}
@@ -104,7 +104,7 @@ func (cfg LassoConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 		}
 
 		maxChange := 0.0
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			if colNorms[j] == 0 {
 				continue
 			}
@@ -113,7 +113,7 @@ func (cfg LassoConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 
 			// Compute partial residual dot product: sum_i x_ij * r_i + colNorm_j * coef_j
 			rho := 0.0
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				rho += rawX.Data[i*rawX.Stride+j] * residual[i]
 			}
 			rho += colNorms[j] * oldCoef
@@ -124,7 +124,7 @@ func (cfg LassoConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 			// Update residuals.
 			delta := coef[j] - oldCoef
 			if delta != 0 {
-				for i := 0; i < nSamples; i++ {
+				for i := range nSamples {
 					residual[i] -= delta * rawX.Data[i*rawX.Stride+j]
 				}
 			}
@@ -147,7 +147,7 @@ func (cfg LassoConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 
 	if cfg.FitIntercept {
 		intercept := yMeanVal
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			intercept -= xMean[j] * coef[j]
 		}
 		model.Intercept = intercept
@@ -210,9 +210,9 @@ func prepareData(X *mat.Dense, y []float64, nSamples, nFeatures int, fitIntercep
 	if fitIntercept {
 		xMean := make([]float64, nFeatures)
 		raw := X.RawMatrix()
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			sum := 0.0
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				sum += raw.Data[i*raw.Stride+j]
 			}
 			xMean[j] = sum / float64(nSamples)
@@ -226,8 +226,8 @@ func prepareData(X *mat.Dense, y []float64, nSamples, nFeatures int, fitIntercep
 
 		// Center X.
 		xData := make([]float64, nSamples*nFeatures)
-		for i := 0; i < nSamples; i++ {
-			for j := 0; j < nFeatures; j++ {
+		for i := range nSamples {
+			for j := range nFeatures {
 				xData[i*nFeatures+j] = raw.Data[i*raw.Stride+j] - xMean[j]
 			}
 		}

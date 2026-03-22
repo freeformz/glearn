@@ -69,7 +69,7 @@ func TestLassoSparsity(t *testing.T) {
 	// y depends only on x1, but we include irrelevant features.
 	X := mat.NewDense(20, 3, nil)
 	y := make([]float64, 20)
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		x1 := float64(i) + 1
 		x2 := float64(i%5) * 0.01 // irrelevant, near zero
 		x3 := float64(i%3) * 0.01 // irrelevant, near zero

@@ -65,9 +65,9 @@ func (cfg RidgeConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 
 	if cfg.FitIntercept {
 		xMean = make([]float64, nFeatures)
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			sum := 0.0
-			for i := 0; i < nSamples; i++ {
+			for i := range nSamples {
 				sum += X.At(i, j)
 			}
 			xMean[j] = sum / float64(nSamples)
@@ -82,8 +82,8 @@ func (cfg RidgeConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 		// Center X.
 		xData := make([]float64, nSamples*nFeatures)
 		raw := X.RawMatrix()
-		for i := 0; i < nSamples; i++ {
-			for j := 0; j < nFeatures; j++ {
+		for i := range nSamples {
+			for j := range nFeatures {
 				xData[i*nFeatures+j] = raw.Data[i*raw.Stride+j] - xMean[j]
 			}
 		}
@@ -107,8 +107,8 @@ func (cfg RidgeConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 
 	// Build SymDense from X'X + alpha*I.
 	xtxData := make([]float64, nFeatures*nFeatures)
-	for i := 0; i < nFeatures; i++ {
-		for j := 0; j < nFeatures; j++ {
+	for i := range nFeatures {
+		for j := range nFeatures {
 			xtxData[i*nFeatures+j] = xtxDense.At(i, j)
 		}
 		xtxData[i*nFeatures+i] += cfg.Alpha
@@ -135,14 +135,14 @@ func (cfg RidgeConfig) Fit(ctx context.Context, X *mat.Dense, y []float64) (glea
 		Coefficients: make([]float64, nFeatures),
 		NFeatures:    nFeatures,
 	}
-	for i := 0; i < nFeatures; i++ {
+	for i := range nFeatures {
 		model.Coefficients[i] = beta.AtVec(i)
 	}
 
 	if cfg.FitIntercept {
 		// intercept = yMean - xMean . coef
 		intercept := yMeanVal
-		for j := 0; j < nFeatures; j++ {
+		for j := range nFeatures {
 			intercept -= xMean[j] * model.Coefficients[j]
 		}
 		model.Intercept = intercept

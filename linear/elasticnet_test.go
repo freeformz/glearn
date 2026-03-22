@@ -119,7 +119,7 @@ func TestElasticNetL1RatioPureL2(t *testing.T) {
 	ols := olsModel.(*LinearRegression)
 
 	// With pure L2, all coefficients should be nonzero (no sparsity).
-	for j := 0; j < 2; j++ {
+	for j := range 2 {
 		if en.Coefficients[j] == 0 {
 			t.Errorf("expected coefficient[%d] to be nonzero with L1Ratio=0", j)
 		}
@@ -160,7 +160,7 @@ func TestElasticNetL1RatioPureLasso(t *testing.T) {
 	en := enModel.(*ElasticNet)
 	lasso := lassoModel.(*Lasso)
 
-	for j := 0; j < 2; j++ {
+	for j := range 2 {
 		if math.Abs(en.Coefficients[j]-lasso.Coefficients[j]) > 0.1 {
 			t.Errorf("coefficient[%d]: ElasticNet(L1Ratio=1) %g != Lasso %g",
 				j, en.Coefficients[j], lasso.Coefficients[j])
